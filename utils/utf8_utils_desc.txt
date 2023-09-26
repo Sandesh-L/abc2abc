@@ -1,0 +1,50 @@
+UTF-8 Utilities
+===============
+UTF-8 is a method of encoding the unicode character set into an a stream of
+8-bit bytes. The standard ASCII characters fall in the range 0-127 and the
+other characters are encoded using 2, 3 or 4 bytes, each of which has the
+high bit (0x80) set.
+Although UTF-8 refers to both the standard acsii characters in the range 0-127
+and the characters represented by multiple bytes, I use the term "UTF-8 string"
+to mean a unicode character representation as a sequence of 2, 3 or 4 bytes,
+each of which is in the range 128-255.
+
+Although abc notation is designed to use only standard ASCII characters,
+there are many places where text strings are printed and it is desirable
+to be able to use the many characters of unicode rather than being limited
+to the ASCII character set. However, embedding raw UTF-8 byte sequences
+in abc files makes them hard to edit, so the abc standard allows them to
+be represented as hexadecimal, using \UXXXXXXXX or \uXXXX where X stands
+for a hexadecimal digit. There are also two other representation methods
+described by the abc 2.2 standard, mnemonic encoding based on Tex, and
+named html entities based on HTML.
+
+void make_utf8_safe(struct vstring *line) - takes the string in line and
+replaces all valid UTF-8 sequences with their \U or \u equivalent while
+replacing all invalid characters with '?'.
+
+char *string_make_utf8_safe(const char *s) - takes string s and returns a newly
+allocated string with the UTF-8 processed as for make_utf8_safe(). The
+returned string must be freed after use. The supplied string s is unchanged
+after the call.
+
+The above two functions, make_utf8_safe and string_make_utf8_safe, do the
+same thing but take their input in a different way.
+
+void apply_utf8_substitions (const char *in_string, struct vstring *out) -
+convert ASCII UTF-8 representations into UTF-8 strings. The ASCII UTF-8
+representations are those described in the abc 2.2 standard, section 15,
+and are derived from other standards referred to there.
+
+As an example, a capital O with a tilde (small wiggly line) above it can
+be represented in the following ways:
+
+Mnemonic representation:
+\~O
+Named html representation:
+&Otilde;
+16-bit hex unicode:
+\u00d5
+32-bit unicode:
+\U000000d5
+

@@ -1,0 +1,90 @@
+Description of string_utils module
+==================================
+
+vstring functions
+=================
+These provide a way of building up arbitrary length strings.
+
+struct vstring - this is the underlying structure to hold a string
+used by these functions.
+
+void initvstring(struct vstring* s) - must be called after
+  a struct vstring has been declared to initialize it to valid values
+  representing a zero-length string.
+void extendvstring(struct vstring* s) - internal function to double the
+  amount of internal space allocated for the string. Not usually called by
+  the user.
+void vstring_addch(struct vstring* s, char ch) - add a single character
+  to a vstring. This takes care of expanding the internal string storage 
+  space as needed.
+void vstring_addtext(struct vstring* s, const char* text) - concatenate a
+  string to the end of a vstring. This takes care of expanding the internal
+  vstring storage space as needed.
+void vstring_addnum(struct vstring *s, int num) - add a numeric value to
+  the end of a vstring. This takes care of expanding the internal vstring
+  storage space as needed.
+void clearvstring(struct vstring* s) - sets a vstring to be the empty string.
+void freevstring(struct vstring* s) - must be called when you have finished
+  using a vstring to release the storage space associated with it.
+
+Input file processing
+=====================
+int abc_source_char(int t, struct vstring *line, read_status_t *status) -
+  provides a way to way to read a file character by character into a
+  vstring. When the whole line has been read, it returns 1. The common
+  variants for end-of-line are all handled correctly and not returned as
+  part of the vstring. The parameters are:
+t - next character in the file.
+line - line to be assembled. Must be empty string on first call.
+status - struct holding a status variable. Initialize to status->done_eol = 0
+  before first call.
+
+Collections of Text Lines
+=========================
+The abc_text_lines_t struct holds collections of text lines that are not
+going to change. Internally, this is a linked list. The functions to
+manipulate these are:
+
+void init_text_lines(abc_text_lines_t *text_lines) - initialize the
+  abc_text_lines_t struct and set it to contain zero lines of text.
+void free_text_lines(abc_text_lines_t *text_lines) - release all the memory
+  associated with an abc_text_lines_t struct when we have finished using it.
+void add_line_to_text_lines(abc_text_lines_t *tl, char *line_to_add) - add a
+  line of text to abc_text_lines_t after the previous last line.
+void duplicate_text_lines(abc_text_lines_t *source, abc_text_lines_t *target) -
+  replicate one abc_text_lines_t struct into another. Every string is duplicated
+  rather than sharing a reference.
+string_record_t *free_string_record(string_record_t * lr) - release one
+  string held in an abc_text_lines_t struct and return a pointer to the next
+  item in the linked list.
+void vstring_add_text_lines(struct vstring *vstr, abc_text_lines_t *new_lines) -
+  given a vstring and a set of text lines, append the text lines to the
+  vstring structure with a newline '\n' character inserted between lines.
+char *text_lines_to_string(abc_text_lines_t *lines) - take a collection of
+  text lines and produce one single string consisting of all the text lines
+  in order with a newline '\n' character inserted between each consecutive
+  pair of text lines.
+
+Legacy Linked List Manipulation
+===============================
+The code also uses struct llist in places. This is almost identical to
+abc_text_lines_t except that it also contains a pointer intended to be
+used for iterating through the items in the linked list. Also, it uses
+(void *) rather than (char *) to hold elements, supporting non-string
+items in the list. The functions are:
+
+void init_llist(struct llist* l) - initialize a struct llist and set it to be
+  empty.
+struct llist* newlist() - allocate a new struct llist, initialize it using
+  init_llist() and return a pointer to the newly allocated struct llist.
+void addtolist(struct llist* p, void* item) - add an item to the end of the
+  list.
+void* firstitem(struct llist* p) - return a pointer to the first item in the
+  list.
+void* nextitem(struct llist* p) - return a pointer to the item in the list
+  after the currently selected one.
+void freellist(struct llist* l) - release all the items in the struct llist
+  and the llist structure itself. Note that if newlist() was used to create
+  the struct llist, then an additional free() will be required on the base
+  struct llist instance.
+
