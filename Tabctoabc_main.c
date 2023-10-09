@@ -272,7 +272,6 @@ static void prepare_tune (char *filename, abc_text_lines_t * abc_lines)
     t = getc (in);
     line_ready = abc_source_char (t, &line, &read_status);
     if (line_ready) {
-      // printf ("line ready : %s\n", line.st);
       add_line_to_text_lines (abc_lines, line.st);
       clearvstring (&line);
     }
@@ -332,9 +331,11 @@ int abc2abc_main (int argc, char *argv[])
   status.func = status.main_funcs;
   parser_start_abcfile (&status);
   current_line = abc_input_lines.first_string;
+  printf("HI %s",current_line->string_data);
   while (current_line != NULL) {
     // printf ("Current Line : %s\n", current_line);
     status.error_obj.lineno = fileline;
+    // HERE
     parseline (&status, current_line->string_data);
     if (!conv->eaftertune &&
       (((last_state == INBODY) && (status.state == OUTSIDE_TUNE)) ||

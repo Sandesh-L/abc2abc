@@ -1306,18 +1306,20 @@ void conversion_note (void *vstatus,
   int octave;
 
   mult = 0;                     /* [SS] 2006-10-27 */
-  if (((conv->transpose == 0) && (conv->nokeysig == 0) &&
-       (conv->changekeysig == 0)) || conv->drumchan) {
-    accidental = xaccidental;
-    mult = xmult;
-    note = xnote;
-    octave = xoctave;
-  } else {
+  // printf("Hi, I am in conversion note, cong->transpose: %i, conv->nokeysig: %i, conv->changekeysig: %i and conv->drumchan: %i \n"
+  // ,conv->transpose, conv->nokeysig, conv->changekeysig,conv->drumchan);
+  // if (((conv->transpose == 0) && (conv->nokeysig == 0) &&
+  //      (conv->changekeysig == 0)) || conv->drumchan) {
+  //   accidental = xaccidental;
+  //   mult = xmult;
+  //   note = xnote;
+  //   octave = xoctave;
+  // } else {
     /* use transposer code */
     transpose_note (&conv->transpose_info,
                     xnote, xaccidental, xmult, xoctave,
                     &note, &accidental, &mult, &octave);
-  }
+  // }
   if (mult == 2) {
     emit_char (status, accidental);
   }

@@ -680,13 +680,13 @@ void transpose_note (transpose_info_t * t,
                      int src_octave, char *note_out, char *accidental_out,
                      int *mult_out, int *octave_out)
 {
+  // printf("In transpose_note, HI\n");
   int effective_semitones;
   int new_semitones;
   char target_accidental;
   int target_mult;
   char target_note;
   int target_octave;
-
   effective_semitones = acc_update_note(&t->src, src_note, src_accidental,
      src_mult, src_octave);
 
@@ -708,6 +708,7 @@ void transpose_note (transpose_info_t * t,
       &target_accidental, &target_mult);
 
   *note_out = target_note;
+  printf("In transpose_note note is: %c \n", target_note);
   *accidental_out = target_accidental;
   *mult_out = target_mult;
   *octave_out = target_octave - 4;
@@ -727,8 +728,9 @@ int transpose_guitar_chord (transpose_info_t * t, char src_note, char src_acc,
   int is_bass = 0;
   noteletter_t target_note_index;
 
-  /* printf("transpose_guitar_chord has src_note %c src_acc %c\n", */
-  /*   src_note, src_acc); */
+  printf("transpose_guitar_chord has src_note %c src_acc %c\n",
+     src_note, src_acc);
+     
   if ((src_note >= 'A') && (src_note <= 'G')) {
     note = src_note;
   } else {
