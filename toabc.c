@@ -25,7 +25,7 @@
 #include "parser_interface.h"
 #include "transposer.h"
 #include "parser_utils.h"
-
+#include "./guitar/guitar_model.c"
 typedef char *char_p;
 
 #define MIDDLE 72
@@ -122,14 +122,27 @@ void emit_string (void *vstatus, const char *s)
 }
 
 /* output single character */
-void emit_char (void *vstatus, char ch)
+void emit_char_as_string (void *vstatus, char ch)
 {
+  char buffer[2];
+  buffer[0] = ch;
+  buffer[1] = '\0';
   parser_status_t *status = (parser_status_t *) vstatus;
-  conversion_state_t *conv = (conversion_state_t *) status->tune_data;
-
-  if (conv->output_on) {
-    vstring_addch( &conv->abc_buffer, ch);
+  if ((status->state == INBODY) && (!status->textinbody)){
+    char*** guitar = createGuitar();
+    int size;
+    NoteLocation* locations = findNote(guitar, "G3", &size);
+    if (locations != NULL) {
+      for (int i = 0; i < size; i++) {
+          printf("Found note at string %d, fret %d\n", locations[i].string + 1, locations[i].fret);
+          // printf("Note: %s\n", guitar[locations[i].string][locations[i].fret +1]);
+      }
+      free(locations);
+    } else {
+        printf("Note not found.\n");
+    }
   }
+  emit_string(vstatus, buffer);
 }
 
 /* output integer */
@@ -243,7 +256,7 @@ void conversion_reserved (void *vstatus, char ch)
     report_warning (&status->error_obj, warning_message);
   }
   /* emit character as another program may support it. */
-  emit_char (status, ch);
+  emit_char_as_string (status, ch);
 }
 
 void conversion_tex (void *vstatus, const char *s)
@@ -268,7 +281,7 @@ void print_inputline (void *vstatus)
   parser_status_t *status = (parser_status_t *) vstatus;
 
   print_inputline_nolinefeed (vstatus);
-  emit_char (status, '\n');
+  emit_char_as_string (status, '\n');
 }
 
 /* We have encountered a score linebreak character in the music.
@@ -280,7 +293,7 @@ void conversion_score_linebreak (void *vstatus, char ch)
 {
   parser_status_t *status = (parser_status_t *) vstatus;
 
-  emit_char (status, ch);
+  emit_char_as_string (status, ch);
 }
 
 /* we have found a linebreak in the abc text */
@@ -382,7 +395,7 @@ void conversion_field (void *vstatus, char k, const char *f)
 {
   parser_status_t *status = (parser_status_t *) vstatus;
 
-  emit_char (status, k);
+  emit_char_as_string (status, k);
   emit_string (status, ": ");
   emit_string (status, f);
 }
@@ -697,15 +710,15 @@ void conversion_timesig (void *vstatus, timesig_details_t *timesig)
       {
         int i;
 
-        emit_char(status, '(');
+        emit_char_as_string(status, '(');
         for (i = 0; i < timesig->num_values; i++)
         {
           if (i > 0) {
-            emit_char(status, '+');
+            emit_char_as_string(status, '+');
           }
           emit_int (status, timesig->complex_values[i]);
         }
-        emit_char(status, ')');
+        emit_char_as_string(status, ')');
         emit_string (status, "/");
         emit_int (status, timesig->denom);
         if (status->state == INHEAD) {
@@ -1020,11 +1033,11 @@ void conversion_broken (void *vstatus, int type, int n)
 
   if (type == GT) {
     for (i = 0; i < n; i++) {
-      emit_char (status, '>');
+      emit_char_as_string (status, '>');
     }
   } else {
     for (i = 0; i < n; i++) {
-      emit_char (status, '<');
+      emit_char_as_string (status, '<');
     }
   }
 }
@@ -1035,7 +1048,7 @@ void conversion_tuple (void *vstatus, int n, int q, int r)
   conversion_state_t *conv = (conversion_state_t *) status->tune_data;
 
   if (conv->newspacing && conv->have_spacing_scheme) {
-    emit_char(status, ' ');
+    emit_char_as_string(status, ' ');
   }
   emit_string (status, "(");
   emit_int (status, n);
@@ -1076,7 +1089,7 @@ void conversion_chordon (void *vstatus, char open_char)
 {
   parser_status_t *status = (parser_status_t *) vstatus;
 
-  emit_char (status, '[');
+  emit_char_as_string (status, '[');
 }
 
 void conversion_chordoff (void *vstatus, int chord_n, int chord_m,
@@ -1086,7 +1099,7 @@ void conversion_chordoff (void *vstatus, int chord_n, int chord_m,
   conversion_state_t *conv = (conversion_state_t *) status->tune_data;
   char string[16];
 
-  emit_char (status, ']');
+  emit_char_as_string (status, ']');
   if (chord_n != 1 && chord_m != 1) {
     sprintf (string, "%d/%d", chord_n, chord_m);
     emit_string (status, string);
@@ -1100,7 +1113,7 @@ void conversion_chordoff (void *vstatus, int chord_n, int chord_m,
   if (conv->newspacing && conv->have_spacing_scheme &&
       (status->tuplenotes == 1)) {
     /* this is the last chord in a tuple, output a space */
-    emit_char(status, ' ');
+    emit_char_as_string(status, ' ');
   }
 }
 
@@ -1148,7 +1161,7 @@ void conversion_gchord (void *vstatus, char pos, char *s)
   if ((conv->transpose == 0) || (pos != ' ')) {
     emit_string (status, "\"");
     if (pos != ' ') {
-      emit_char(status, pos);
+      emit_char_as_string(status, pos);
     }
     emit_string (status, s);
     emit_string (status, "\"");
@@ -1234,7 +1247,7 @@ void conversion_char_decoration (void *vstatus, char ch)
 {
   parser_status_t *status = (parser_status_t *) vstatus;
 
-  emit_char (status, ch);
+  emit_char_as_string (status, ch);
 }
 
 /* handles a redefinable single char symbol used for a text string */
@@ -1242,7 +1255,7 @@ void conversion_char_gchord (void *vstatus, char ch)
 {
   parser_status_t *status = (parser_status_t *) vstatus;
 
-  emit_char (status, ch);
+  emit_char_as_string (status, ch);
 }
 
 void conversion_slur (void *vstatus, int t)
@@ -1283,7 +1296,7 @@ void conversion_lineend (void *vstatus, char ch, int n)
   int i;
 
   for (i = 0; i < n; i++) {
-    emit_char (status, ch);
+    emit_char_as_string (status, ch);
   }
 }
 
@@ -1306,33 +1319,35 @@ void conversion_note (void *vstatus,
   int octave;
 
   mult = 0;                     /* [SS] 2006-10-27 */
-  if (((conv->transpose == 0) && (conv->nokeysig == 0) &&
-       (conv->changekeysig == 0)) || conv->drumchan) {
-    accidental = xaccidental;
-    mult = xmult;
-    note = xnote;
-    octave = xoctave;
-  } else {
+  // printf("Hi, I am in conversion note, cong->transpose: %i, conv->nokeysig: %i, conv->changekeysig: %i and conv->drumchan: %i \n"
+  // ,conv->transpose, conv->nokeysig, conv->changekeysig,conv->drumchan);
+  // if (((conv->transpose == 0) && (conv->nokeysig == 0) &&
+  //      (conv->changekeysig == 0)) || conv->drumchan) {
+  //   accidental = xaccidental;
+  //   mult = xmult;
+  //   note = xnote;
+  //   octave = xoctave;
+  // } else {
     /* use transposer code */
     transpose_note (&conv->transpose_info,
                     xnote, xaccidental, xmult, xoctave,
                     &note, &accidental, &mult, &octave);
-  }
+  // }
   if (mult == 2) {
-    emit_char (status, accidental);
+    emit_char_as_string (status, accidental);
   }
   if (accidental != ' ') {
-    emit_char (status, accidental);
+    emit_char_as_string (status, accidental);
   }
   if (octave >= 1) {
-    emit_char (status, note);
+    emit_char_as_string (status, note);
     t = octave;
     while (t > 1) {
       emit_string (status, "'");
       t = t - 1;
     }
   } else {
-    emit_char (status, (char)((int)note + 'C' - 'c'));
+    emit_char_as_string (status, (char)((int)note + 'C' - 'c'));
     t = octave;
     while (t < 0) {
       emit_string (status, ",");
@@ -1367,7 +1382,7 @@ void conversion_note_end (void *vstatus)
     if (status->tuplenotes == 1)
     {
       /* this the last note in tuple, put a space after it */
-      emit_char(status, ' ');
+      emit_char_as_string(status, ' ');
     }
     /* never break beaming within a tuple */
     return;
@@ -1405,13 +1420,13 @@ void conversion_microtone (void *vstatus, int dir, int a, int b)
 
   /* use sharp or flat symbol */
   if (dir == 1) {
-    emit_char (status, '^');
+    emit_char_as_string (status, '^');
   } else {
-    emit_char (status, '_');
+    emit_char_as_string (status, '_');
   }
   /* follow sharp/flat with a fraction */
   emit_int (status, a);
-  emit_char (status, '/');
+  emit_char_as_string (status, '/');
   emit_int (status, b);
 }
 
@@ -1433,13 +1448,13 @@ void conversion_abbreviation (void *vstatus, char symbol, const char *string,
 
   if (container == '!') {
     emit_field_key (status, "U:");
-    emit_char (status, symbol);
+    emit_char_as_string (status, symbol);
     emit_string (status, " = !");
     emit_string (status, string);
     emit_string (status, "!");
   } else {
     emit_field_key (status, "U:");
-    emit_char (status, symbol);
+    emit_char_as_string (status, symbol);
     emit_string (status, " = ");
     emit_string (status, string);
     emit_string (status, "");

@@ -122,7 +122,6 @@ noteletter_t note_index (char note_ch)
 /* convert a letter a - g into a note value in semitones */
 int semitone_value_for_note (noteletter_t note)
 {
-  printf("%u \n",note);
   switch (note) {
     case note_c:
       return 0;
@@ -772,7 +771,6 @@ int acc_update_note(apply_acc_t *acc_state, char src_note, char src_accidental, 
       printf ("Internal error: Unexpected accidental char 0x%x\n", (int)effective_acc);
       break;
   }
-  printf("HELP ME %c",effective_acc);
   return effective_semitones;
 }
 
