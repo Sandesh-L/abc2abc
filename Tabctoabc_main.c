@@ -331,7 +331,6 @@ int abc2abc_main (int argc, char *argv[])
   status.func = status.main_funcs;
   parser_start_abcfile (&status);
   current_line = abc_input_lines.first_string;
-  printf("HI %s",current_line->string_data);
   while (current_line != NULL) {
     // printf ("Current Line : %s\n", current_line);
     status.error_obj.lineno = fileline;

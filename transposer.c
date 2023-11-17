@@ -680,7 +680,6 @@ void transpose_note (transpose_info_t * t,
                      int src_octave, char *note_out, char *accidental_out,
                      int *mult_out, int *octave_out)
 {
-  // printf("In transpose_note, HI\n");
   int effective_semitones;
   int new_semitones;
   char target_accidental;
@@ -708,7 +707,6 @@ void transpose_note (transpose_info_t * t,
       &target_accidental, &target_mult);
 
   *note_out = target_note;
-  printf("In transpose_note note is: %c \n", target_note);
   *accidental_out = target_accidental;
   *mult_out = target_mult;
   *octave_out = target_octave - 4;
