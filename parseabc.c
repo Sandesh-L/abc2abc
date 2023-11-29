@@ -38,6 +38,7 @@
 #include "parser_interface.h"
 #include "barlines.h"
 #include "parser_utils.h"
+// #include "toabc.h"
 
 /* fields permitted in various places as specified by abc standard 2.2 */
 #define PERMITTED_FILE_HEADER_FIELDS "ABCDFGHILMmNORrSUZ"
@@ -2926,6 +2927,7 @@ void parsemusic (parser_status_t * status, const char *field)
       status->src_line = field;
       status->error_ch = (int)(p - field);
       parsenote (status, &p);
+      // conversion_note(status);
     } else {
       switch (*p) {
         case '"':

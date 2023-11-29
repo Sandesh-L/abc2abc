@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 #include "abc.h"
 #include "parseabc.h"
 #include "toabc.h"
@@ -26,6 +27,8 @@
 #include "transposer.h"
 #include "parser_utils.h"
 #include "./guitar/guitar_model.c"
+#include "./guitar/note_conversion.h"
+#include "string_utils.h"
 typedef char *char_p;
 
 #define MIDDLE 72
@@ -124,25 +127,67 @@ void emit_string (void *vstatus, const char *s)
 /* output single character */
 void emit_char_as_string (void *vstatus, char ch)
 {
-  char buffer[2];
-  buffer[0] = ch;
-  buffer[1] = '\0';
+
+  static NoteState noteState = {.inNote = false};
+
+  // static struct vstring NoteBuffer;
+  // static bool inNote = false;
+  // static bool lastCharWasNoteChar = false;
+
   parser_status_t *status = (parser_status_t *) vstatus;
   if ((status->state == INBODY) && (!status->textinbody)){
-    char*** guitar = createGuitar();
-    int size;
-    NoteLocation* locations = findNote(guitar, "G3", &size);
-    if (locations != NULL) {
-      for (int i = 0; i < size; i++) {
-          printf("Found note at string %d, fret %d\n", locations[i].string + 1, locations[i].fret);
-          // printf("Note: %s\n", guitar[locations[i].string][locations[i].fret +1]);
+    // char*** guitar = createGuitar();
+    // int size;
+    printf("inNote: %d\n", noteState.inNote);
+    if (isNoteCharacter(ch)){
+      if(!noteState.inNote){
+        noteState.inNote = true;
+        initvstring(&noteState.noteBuffer);
       }
-      free(locations);
-    } else {
-        printf("Note not found.\n");
+      accumulateNoteCharacter(&noteState.noteBuffer,ch);
+      printf("Note buffer: %s\n", noteState.noteBuffer.st);
+
+    } else if (noteState.inNote){
+      printf("Note: %c isNoteCharacter: %d isOctaveModifier: %d\n ", ch, isNoteCharacter(ch), isOctaveModifier(ch));
+      printf("is , an OctaveModifier: %d\n", isOctaveModifier(','));
+      if (isOctaveModifier(ch)){
+        accumulateNoteCharacter(&noteState.noteBuffer,ch);
+      }else{
+        char* standardNote = convertNoteToStandardNotation(noteState.noteBuffer.st);
+        if(standardNote != NULL){        
+          // Do something with the note
+          // send it to the guitar model
+          printf("Note: %s\n", standardNote);
+          free(standardNote);
+        }
+        // Reset for the next note
+        freevstring(&noteState.noteBuffer);
+        noteState.inNote = false;
+      }
     }
   }
+    // Emit the original character or handle other tasks
+
+  char buffer[2] = {ch, '\0'};
   emit_string(vstatus, buffer);
+    
+  //   char buffer[2];
+  //   buffer[0] = ch;
+  //   buffer[1] = '\0';
+  //   char* note = convertNoteToStandardNotation(buffer);
+  //   NoteLocation* locations = findNote(guitar, note, &size);
+  //   if (locations != NULL) {
+  //     for (int i = 0; i < size; i++) {
+  //         printf("Found note at string %d, fret %d\n", locations[i].string + 1, locations[i].fret);
+  //         // printf("Note: %s\n", guitar[locations[i].string][locations[i].fret +1]);
+  //     }
+  //     free(locations);
+  //     free(note);
+  //   } else {
+  //       printf("Note not found.\n");
+  //   }
+  // }
+  // emit_string(vstatus, buffer);
 }
 
 /* output integer */
@@ -1304,6 +1349,28 @@ void conversion_lineend (void *vstatus, char ch, int n)
  * The decorations are handled as encountered in the toabc backend, so
  * we don't need to handle them here.
  */
+
+// Utility function to create the octave modifier string for ABC notation
+void getOctaveModifier(int octave, char* modifier) {
+    int i;
+    if (octave == 1) {
+        // Middle octave, no modifier
+        strcpy(modifier, "");
+    } else if (octave > 1) {
+        // Higher octaves, use apostrophes
+        for (i = 1; i < octave; i++) {
+            modifier[i - 1] = '\'';
+        }
+        modifier[i - 1] = '\0';
+    } else {
+        // Lower octaves, use commas
+        for (i = 0; i < abs(octave); i++) {
+            modifier[i] = ',';
+        }
+        modifier[i] = '\0';
+    }
+}
+
 void conversion_note (void *vstatus,
                       decoration_context_t *dec_context,
                       cleftype_t *clef,
@@ -1358,6 +1425,21 @@ void conversion_note (void *vstatus,
   newlen.denom = m * conv->lenfactor.denom;
   reduce (&newlen.num, &newlen.denom);
   printlen (status, newlen.num, newlen.denom);
+
+  char abcNote[10];
+  char octaveModifier[10];
+
+  getOctaveModifier(xoctave, octaveModifier);
+  snprintf(abcNote, sizeof(abcNote), "%c%s", xnote, octaveModifier);
+
+  char* standardNote = convertNoteToStandardNotation(abcNote);
+
+  if (standardNote != NULL) {
+      // Emit the converted note
+      emit_string(vstatus, standardNote);
+      free(standardNote);
+  }
+
 }
 
 /* called after note when barcount has moved on by note time value */

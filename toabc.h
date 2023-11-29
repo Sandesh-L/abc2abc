@@ -76,6 +76,11 @@ typedef struct conversion_state {
 conversion_state_t *new_conversion_state(void);
 conversion_state_t *free_conversion_state(conversion_state_t *conv);
 
+// void conversion_note(parser_status_t *status,
+//                       decoration_context_t *dec_context,
+//                       cleftype_t *clef,
+//                       char xaccidental, int xmult, char xnote, int xoctave,
+//                       int n, int m);
 void conversion_error(error_object_t *error_obj, char *s);
 void conversion_warning(error_object_t *error_obj, char *s);
 

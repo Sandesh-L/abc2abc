@@ -74,6 +74,9 @@ typedef struct voice_context {
   struct fract barcount;   /* sum of note lengths in current bar */
   int last_bar_type;
   int extended_bar;
+  // char current_accidental;
+  // char current_note;
+  // int current_octave;
   bar_record_t *bars_in_tune;
   bar_record_t *current_bar;
 } voice_context_t;
