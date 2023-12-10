@@ -1299,11 +1299,11 @@ void conversion_note (void *vstatus,
 {
   parser_status_t *status = (parser_status_t *) vstatus;
   conversion_state_t *conv = (conversion_state_t *) status->tune_data;
-  int t;
+  // int t;
   struct fract newlen;
   int mult;
   char accidental, note;
-  int octave;
+  int octave = 4;
 
   mult = 0;                     /* [SS] 2006-10-27 */
   if (((conv->transpose == 0) && (conv->nokeysig == 0) &&
@@ -1311,34 +1311,104 @@ void conversion_note (void *vstatus,
     accidental = xaccidental;
     mult = xmult;
     note = xnote;
-    octave = xoctave;
+    octave += xoctave;
   } else {
     /* use transposer code */
     transpose_note (&conv->transpose_info,
                     xnote, xaccidental, xmult, xoctave,
                     &note, &accidental, &mult, &octave);
   }
-  if (mult == 2) {
-    emit_char (status, accidental);
+
+  char standardNote;
+
+  if (islower(note)){
+    standardNote = toupper(note);
+  }else{
+    standardNote = note;
   }
-  if (accidental != ' ') {
-    emit_char (status, accidental);
-  }
-  if (octave >= 1) {
-    emit_char (status, note);
-    t = octave;
-    while (t > 1) {
-      emit_string (status, "'");
-      t = t - 1;
+
+  if (mult == 2){ // double flats or sharps
+    printf("accidental = %c\n", accidental);
+    switch(standardNote){
+      case 'A': 
+        standardNote = (accidental == '^') ? 'B' : 'G'; 
+        accidental = ' '; 
+        break;
+      case 'B': 
+        standardNote = (accidental == '^') ? 'C' : 'A'; 
+        accidental = (accidental == '^') ? '^' : ' '; 
+        break;
+      case 'C': 
+        standardNote = (accidental == '^') ? 'D' : 'B'; 
+        accidental = (accidental == '_') ? '_' : ' '; break;
+      case 'D': 
+        standardNote = (accidental == '^') ? 'E' : 'C'; 
+        accidental = ' '; 
+        break;
+      case 'E': 
+        standardNote = (accidental == '^') ? 'F' : 'D'; 
+        accidental = (accidental == '^') ? '^' : ' '; 
+        break;
+      case 'F': 
+        standardNote = (accidental == '^') ? 'G' : 'E'; 
+        accidental = (accidental == '_') ? '_' : ' '; 
+        break;
+      case 'G': 
+        standardNote = (accidental == '^') ? 'A' : 'F'; 
+        accidental = ' '; 
+        break;
     }
-  } else {
-    emit_char (status, (char)((int)note + 'C' - 'c'));
-    t = octave;
-    while (t < 0) {
-      emit_string (status, ",");
-      t = t + 1;
+    if (accidental == '_') {
+      octave -= (note == 'C') ? 1 : 0; // Adjust octave if wrapping from C
+    } else if (accidental == '^'){
+      octave -= (note =='B') ? 1: 0; // Adjust octave if wrapping from B
     }
   }
+
+  printf("accidental = %c\n", accidental);
+  char accidentalChar = ' ';
+  if (accidental == '_'){
+    accidentalChar = 'b';
+  } else if (accidental == '^'){
+    accidentalChar = '#';
+  }
+  printf("accidentalChar = %c\n", accidentalChar);
+
+  char standardNotation[6];
+  if (accidentalChar == ' '){  // if there is an accidental
+    snprintf(standardNotation, sizeof(standardNotation), "%c%d", standardNote, octave);
+  } else{
+    snprintf(standardNotation, sizeof(standardNotation), "%c%c%d", standardNote, accidentalChar, octave);
+  }
+  
+
+  emit_string(status, standardNotation);
+
+
+  // if (mult == 2) { // double accidentals
+  //   emit_char (status, accidental);
+  // }
+  // if (accidental != ' ') { // no accidentals
+  //   emit_char (status, accidental);
+  // }
+  // if (octave >= 1) { // octaves up
+  //   emit_char (status, note);
+  //   t = octave;
+  //   while (t > 1) {
+  //     emit_string (status, "'");
+  //     t = t - 1;
+  //   }
+  // } else {
+  //   emit_char (status, (char)((int)note + 'C' - 'c'));
+  //   t = octave;
+  //   while (t < 0) { // octaves down
+  //     emit_string (status, ",");
+  //     t = t + 1;
+  //   }
+  // }
+
+
+
   newlen.num = n * conv->lenfactor.num;
   newlen.denom = m * conv->lenfactor.denom;
   reduce (&newlen.num, &newlen.denom);
