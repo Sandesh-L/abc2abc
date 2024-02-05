@@ -67,7 +67,7 @@ NoteLocation* findNote(char*** guitar, const char* note, int* size) {
     NoteLocation* locations = malloc(capacity * sizeof(NoteLocation));
     *size = 0;
     // printf("Searching for note: %s\n", note);
-    printf("looking for: %s \n", note);
+    // printf("looking for: %s \n", note);
     for (int string = 0; string < STRINGS; string++) {
         for (int fret = 0; fret < FRETS; fret++) {
             if (strstr(guitar[string][fret], note) != NULL) {
