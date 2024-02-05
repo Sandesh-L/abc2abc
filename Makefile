@@ -164,6 +164,9 @@ utils/string_utils.o: utils/string_utils.c utils/string_utils.h
 utils/utf8_utils.o: utils/utf8_utils.c utils/utf8_utils.h utils/string_utils.h
 	$(CC) $(CFLAGS) -c utils/utf8_utils.c -o utils/utf8_utils.o
 
+# guitar_model.o: guitar_model.c guitar_model.h
+# 	$(CC) $(CFLAGS) -c guitar/guitar_model.c -o guitar/guitar_model.o
+
 # gtk_music_window.o and gtk_gui.o are only used in the GTK version of
 # Toadflax.
 
@@ -223,7 +226,8 @@ Tcairodraw: Tcairodraw.c preparse.h utils/utf8_utils.h draw_music.h $(TCAIRODRAW
   $(PANGOCAIRO_LIBS) -lm -lrt
 
 TABCTOABC_OBJECTS=toabc.o transposer.o utils/string_utils.o music_utils.o \
-  parser_utils.o parseabc.o barlines.o
+  parser_utils.o parseabc.o barlines.o 
+#   guitar_model.o
 
 Tabctoabc: $(TABCTOABC_OBJECTS) Tabctoabc_main.c build_date.h abc.h parseabc.h \
   toabc.h barlines.h

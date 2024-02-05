@@ -2836,11 +2836,11 @@ const char *process_inlines(parser_status_t * status, const char *field)
 {
   const char *p;
   int space_count;
-
   p = field;
   space_count = skipspace (&p);
   status->func->space (status, space_count);
   while ((*p == '[') && isalpha (*(p+1)) && (*(p + 2) == ':')) {
+  // HERE
     parser_checkpoint (status);
     p = p + 1;
     status->inline_field = 1;
@@ -2918,6 +2918,7 @@ void parsemusic (parser_status_t * status, const char *field)
       p = p + 1;
     }
 
+    // HERE
     if (((*p >= 'a') && (*p <= 'g')) || ((*p >= 'A') && (*p <= 'G')) ||
         (abbrev_index(*p) != -1) ||
         (strchr ("_^=", *p) != NULL)
@@ -3278,6 +3279,7 @@ void parsemusic (parser_status_t * status, const char *field)
 }
 
 /* top-level routine for handling a line in abc file */
+//HERE
 void parseline_main (parser_status_t * status, char *line)
 {
   const char *p;
