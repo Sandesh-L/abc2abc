@@ -1312,48 +1312,139 @@ void conversion_note (void *vstatus,
 {
   parser_status_t *status = (parser_status_t *) vstatus;
   conversion_state_t *conv = (conversion_state_t *) status->tune_data;
-  int t;
+  // int t;
   struct fract newlen;
   int mult;
   char accidental, note;
-  int octave;
+  int octave = 4;
 
   mult = 0;                     /* [SS] 2006-10-27 */
-  // printf("Hi, I am in conversion note, cong->transpose: %i, conv->nokeysig: %i, conv->changekeysig: %i and conv->drumchan: %i \n"
-  // ,conv->transpose, conv->nokeysig, conv->changekeysig,conv->drumchan);
-  // if (((conv->transpose == 0) && (conv->nokeysig == 0) &&
-  //      (conv->changekeysig == 0)) || conv->drumchan) {
-  //   accidental = xaccidental;
-  //   mult = xmult;
-  //   note = xnote;
-  //   octave = xoctave;
-  // } else {
+  if (((conv->transpose == 0) && (conv->nokeysig == 0) &&
+       (conv->changekeysig == 0)) || conv->drumchan) {
+    accidental = xaccidental;
+    mult = xmult;
+    note = xnote;
+    octave += xoctave;
+  } else {
     /* use transposer code */
     transpose_note (&conv->transpose_info,
                     xnote, xaccidental, xmult, xoctave,
                     &note, &accidental, &mult, &octave);
-  // }
-  if (mult == 2) {
-    emit_char_as_string (status, accidental);
   }
-  if (accidental != ' ') {
-    emit_char_as_string (status, accidental);
+
+  // printf("KeySignature: %d \n", conv->changekeysig);
+
+  char standardNote;
+
+  if (islower(note)){
+    standardNote = toupper(note);
+  }else{
+    standardNote = note;
   }
-  if (octave >= 1) {
-    emit_char_as_string (status, note);
-    t = octave;
-    while (t > 1) {
-      emit_string (status, "'");
-      t = t - 1;
+
+  if (mult == 2){ // double flats or sharps
+    // printf("accidental = %c\n", accidental);
+    switch(standardNote){
+      case 'A': 
+        standardNote = (accidental == '^') ? 'B' : 'G'; 
+        accidental = ' '; 
+        break;
+      case 'B': 
+        standardNote = (accidental == '^') ? 'C' : 'A';
+        accidental = (accidental == '^') ? '^' : ' '; 
+        if (standardNote == 'C'){ // Adjust octave when wrapping
+          octave += 1;
+        } 
+        break;
+      case 'C': 
+        standardNote = (accidental == '^') ? 'D' : 'B'; 
+        accidental = (accidental == '_') ? '_' : ' ';
+        if (standardNote == 'B'){ // Adjust octave when wrapping
+          octave -= 1;
+        }  
+        break;
+      case 'D': 
+        standardNote = (accidental == '^') ? 'E' : 'C'; 
+        accidental = ' '; 
+        break;
+      case 'E': 
+        standardNote = (accidental == '^') ? 'F' : 'D'; 
+        accidental = (accidental == '^') ? '^' : ' '; 
+        break;
+      case 'F': 
+        standardNote = (accidental == '^') ? 'G' : 'E'; 
+        accidental = (accidental == '_') ? '_' : ' '; 
+        break;
+      case 'G': 
+        standardNote = (accidental == '^') ? 'A' : 'F'; 
+        accidental = ' '; 
+        break;
     }
+  }
+
+  if (accidental == '_') {
+    switch(standardNote){
+      case 'C':
+        standardNote = 'B';
+        accidental = ' ';
+        octave -= 1;
+        break;
+      case 'F':
+        standardNote = 'E';
+        accidental = ' ';
+        break;
+    }
+  } else if (accidental == '^'){
+      switch(standardNote){
+      case 'B':
+        standardNote = 'C';
+        accidental = ' ';
+        octave += 1;
+        break;
+      case 'E':
+        standardNote = 'F';
+        accidental = ' ';
+        break;
+    }
+  }
+
+
+  // printf("accidental = %c\n", accidental);
+  char accidentalChar = ' ';
+  if (accidental == '_'){
+    accidentalChar = 'b';
+  } else if (accidental == '^'){
+    accidentalChar = '#';
+  }
+  // printf("accidentalChar = %c\n", accidentalChar);
+
+  char standardNotation[6];
+  if (accidentalChar == ' '){  // if there is an accidental
+    snprintf(standardNotation, sizeof(standardNotation), "%c%d", standardNote, octave);
+  } else{
+    snprintf(standardNotation, sizeof(standardNotation), "%c%c%d", standardNote, accidentalChar, octave);
+  }
+  
+
+  // Guitar Model
+  char*** guitar = createGuitar();
+  int size;
+  NoteLocation* locations = findNote(guitar, standardNotation, &size);
+  if (locations != NULL && size > 0){
+    char* chord = convertLocationToChord(&locations[0]);  // Only first location TODO: chage this after optimal path is found
+    // printf("Chord representation: %s\n", chord);
+
+    emit_string(status, chord);
+    free(chord);
   } else {
-    emit_char_as_string (status, (char)((int)note + 'C' - 'c'));
-    t = octave;
-    while (t < 0) {
-      emit_string (status, ",");
-      t = t + 1;
-    }
+    printf("Note note found. \n");
   }
+
+  freeGuitar(guitar);
+  free(locations);
+
+
+
   newlen.num = n * conv->lenfactor.num;
   newlen.denom = m * conv->lenfactor.denom;
   reduce (&newlen.num, &newlen.denom);
