@@ -1432,7 +1432,11 @@ void conversion_note (void *vstatus,
   NoteLocation* locations = findNote(guitar, standardNotation, &size);
   if (locations != NULL && size > 0){
     char* chord = convertLocationToChord(&locations[0]);  // Only first location TODO: chage this after optimal path is found
-    // printf("Chord representation: %s\n", chord);
+
+    printf("\n note %s ", standardNotation);
+    for (int i = 0; i < size; ++i) {
+      printf("%d,%d ", locations[i].string, locations[i].fret);
+    }
 
     emit_string(status, chord);
     free(chord);
@@ -1442,7 +1446,6 @@ void conversion_note (void *vstatus,
 
   freeGuitar(guitar);
   free(locations);
-
 
 
   newlen.num = n * conv->lenfactor.num;
