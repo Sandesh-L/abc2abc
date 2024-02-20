@@ -102,7 +102,7 @@ void freeGuitar(char*** guitar) {
 
 
 char* convertLocationToChord(NoteLocation* location){
-    // TODO: there is a bug in the abctab2ps program. When 'l' should represent the 10th fret but 'x' is written instead
+    // TODO: there is a bug in the abctab2ps program. 'l' should represent the 10th fret (as the number 10) but 'x' is written instead
     
     char* chord = malloc((STRINGS + 2)* sizeof(char)); // 6 strings + 2 for brackets
     if (chord == NULL){
