@@ -180,10 +180,6 @@ void calculateAndStoreMoveCosts(parser_status_t* status, NoteLocation* newLocati
             fprintf(status->movement_costs_file_ptr, "Move: S %d F %d to S %d F %d, Cost: %d\n",
                    status->prev_note_locations[i].string + 1, status->prev_note_locations[i].fret,
                    newLocations[j].string + 1, newLocations[j].fret, cost);
-            // printf("Move: S %d F %d to S %d F %d, Cost: %d\n",
-            //        status->prev_note_locations[i].string + 1, status->prev_note_locations[i].fret,
-            //        newLocations[j].string + 1, newLocations[j].fret, cost);
-
         }
     }
     updatePreviousLocations(status, newLocations, size);
