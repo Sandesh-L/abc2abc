@@ -1,1 +1,8 @@
 Tabctoabc.dSYM/
+./downward/__pycache__/
+./downward//output.sas
+./downward//sas_plan
+./downward//sas_plan.*
+./downward//builds/
+./downward//misc/.tox/
+./downward//misc/autodoc/downward-xmlrpc.secret
