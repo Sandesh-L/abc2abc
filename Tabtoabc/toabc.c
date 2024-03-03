@@ -131,11 +131,11 @@ void emit_char_as_string (void *vstatus, char ch)
   if ((status->state == INBODY) && (!status->textinbody)){
     char*** guitar = createGuitar();
     int size;
-    NoteLocation* locations = findNote(guitar, "G3", &size);
+    NoteLocation* locations = findNote(guitar, &ch, &size);
     if (locations != NULL) {
       for (int i = 0; i < size; i++) {
-          printf("Found note at string %d, fret %d\n", locations[i].string + 1, locations[i].fret);
-          // printf("Note: %s\n", guitar[locations[i].string][locations[i].fret +1]);
+          // printf("Found note at string %d, fret %d\n", locations[i].string + 1, locations[i].fret);
+          printf("Note: %s\n", guitar[locations[i].string][locations[i].fret +1]);
       }
       free(locations);
     } else {
@@ -1433,15 +1433,25 @@ void conversion_note (void *vstatus,
   if (locations != NULL && size > 0){
     char* chord = convertLocationToChord(&locations[0]);  // Only first location TODO: chage this after optimal path is found
 
-    printf("\n note %s ", standardNotation);
-    for (int i = 0; i < size; ++i) {
-      printf("%d,%d ", locations[i].string, locations[i].fret);
+    if (status->note_locations_file_ptr != NULL){
+      fprintf(status->note_locations_file_ptr,"\n note %s ", standardNotation);
+      for (int i = 0; i < size; ++i) {
+        fprintf(status->note_locations_file_ptr, "%d,%d ", locations[i].string, locations[i].fret);
+      }
     }
 
     emit_string(status, chord);
     free(chord);
   } else {
     printf("Note note found. \n");
+  }
+
+
+  if (status->prev_note_locations_size != 0){
+    calculateAndStoreMoveCosts(status, locations, size);
+  } else {
+    updatePreviousLocations(status, locations, size);
+    locations = NULL;
   }
 
   freeGuitar(guitar);

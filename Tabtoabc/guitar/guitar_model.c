@@ -83,7 +83,7 @@ NoteLocation* findNote(char*** guitar, const char* note, int* size) {
     }
     if (*size == 0) {
         free(locations);
-        printf("Note %s not found on the guitar fretboard.\n", note);
+        printf("\n Note %s not found on the guitar fretboard.\n", note);
         return NULL;
     }
     return locations;
@@ -135,4 +135,56 @@ char* convertLocationToChord(NoteLocation* location){
 
     return chord;
 
+}
+
+
+int calculateDistance(NoteLocation loc1, NoteLocation loc2){
+    int stringDistance = abs(loc1.string - loc2.string);
+    int fretDistance = abs(loc1.fret - loc2.fret);
+    return stringDistance + fretDistance;
+}
+
+
+void updatePreviousLocations(parser_status_t* status, NoteLocation* locations, int size){
+    if (status->prev_note_locations != NULL) {
+        free(status->prev_note_locations);
+        status->prev_note_locations = NULL;  // Prevent dangling pointer
+    }
+
+    if (locations == NULL || size == 0) {
+        // Handle invalid input gracefully
+        status->prev_note_locations_size = 0;
+        return;
+    }
+
+    // Allocate new memory and copy locations
+    status->prev_note_locations = (NoteLocation*)malloc(size * sizeof(NoteLocation));
+    if (status->prev_note_locations == NULL) {
+        // Handle memory allocation failure
+        fprintf(stderr, "Failed to allocate memory for previous note locations.\n");
+        status->prev_note_locations_size = 0;
+        return;
+    }
+    memcpy(status->prev_note_locations, locations, size * sizeof(NoteLocation));
+    status->prev_note_locations_size = size;
+}
+
+void calculateAndStoreMoveCosts(parser_status_t* status, NoteLocation* newLocations, int size){
+    if (status->prev_note_locations_size == 0 || size == 0){
+        printf("One of the note locations is missing. \n");
+    }
+
+    for (int i = 0; i < status->prev_note_locations_size; i++){
+        for (int j=0; j < size; j++){
+            int cost = calculateDistance(status->prev_note_locations[i],newLocations[j]);
+            fprintf(status->movement_costs_file_ptr, "Move: S %d F %d to S %d F %d, Cost: %d\n",
+                   status->prev_note_locations[i].string + 1, status->prev_note_locations[i].fret,
+                   newLocations[j].string + 1, newLocations[j].fret, cost);
+            // printf("Move: S %d F %d to S %d F %d, Cost: %d\n",
+            //        status->prev_note_locations[i].string + 1, status->prev_note_locations[i].fret,
+            //        newLocations[j].string + 1, newLocations[j].fret, cost);
+
+        }
+    }
+    updatePreviousLocations(status, newLocations, size);
 }
