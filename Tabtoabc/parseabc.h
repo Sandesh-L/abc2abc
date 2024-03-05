@@ -153,6 +153,7 @@ typedef struct parser_status {
   FILE* movement_costs_file_ptr;
   NoteLocation* prev_note_locations;
   int prev_note_locations_size;
+  int note_count;
 
 } parser_status_t;
 

@@ -1424,7 +1424,6 @@ void conversion_note (void *vstatus,
   } else{
     snprintf(standardNotation, sizeof(standardNotation), "%c%c%d", standardNote, accidentalChar, octave);
   }
-  
 
   // Guitar Model
   char*** guitar = createGuitar();
@@ -1433,8 +1432,9 @@ void conversion_note (void *vstatus,
   if (locations != NULL && size > 0){
     char* chord = convertLocationToChord(&locations[0]);  // Only first location TODO: chage this after optimal path is found
 
+    status->note_count += 1;
     if (status->note_locations_file_ptr != NULL){
-      fprintf(status->note_locations_file_ptr,"\n note %s ", standardNotation);
+      fprintf(status->note_locations_file_ptr,"\n note %d%s ",status->note_count, standardNotation);
       for (int i = 0; i < size; ++i) {
         fprintf(status->note_locations_file_ptr, "%d,%d ", locations[i].string, locations[i].fret);
       }

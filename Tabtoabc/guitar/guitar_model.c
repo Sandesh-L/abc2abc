@@ -173,13 +173,12 @@ void calculateAndStoreMoveCosts(parser_status_t* status, NoteLocation* newLocati
     if (status->prev_note_locations_size == 0 || size == 0){
         printf("One of the note locations is missing. \n");
     }
-
     for (int i = 0; i < status->prev_note_locations_size; i++){
         for (int j=0; j < size; j++){
             int cost = calculateDistance(status->prev_note_locations[i],newLocations[j]);
-            fprintf(status->movement_costs_file_ptr, "Move: S %d F %d to S %d F %d, Cost: %d\n",
-                   status->prev_note_locations[i].string + 1, status->prev_note_locations[i].fret,
-                   newLocations[j].string + 1, newLocations[j].fret, cost);
+            fprintf(status->movement_costs_file_ptr, "Move: %d_%d to %d_%d, Cost: %d\n",
+                   status->prev_note_locations[i].string, status->prev_note_locations[i].fret,
+                   newLocations[j].string, newLocations[j].fret, cost);
         }
     }
     updatePreviousLocations(status, newLocations, size);

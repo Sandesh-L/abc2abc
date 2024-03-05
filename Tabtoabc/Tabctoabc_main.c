@@ -324,6 +324,7 @@ int abc2abc_main (int argc, char *argv[])
     exit(EXIT_FAILURE); // Consider a more graceful exit strategy in real applications
   }
 
+  status.note_count = 0;
 
 
   string_record_t *current_line = NULL;
