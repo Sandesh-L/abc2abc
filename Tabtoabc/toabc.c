@@ -1434,9 +1434,9 @@ void conversion_note (void *vstatus,
 
     status->note_count += 1;
     if (status->note_locations_file_ptr != NULL){
-      fprintf(status->note_locations_file_ptr,"\n note %d%s ",status->note_count, standardNotation);
+      fprintf(status->note_locations_file_ptr,"note %d%s ",status->note_count, standardNotation);
       for (int i = 0; i < size; ++i) {
-        fprintf(status->note_locations_file_ptr, "%d,%d ", locations[i].string, locations[i].fret);
+        fprintf(status->note_locations_file_ptr, "%d,%d \n", locations[i].string, locations[i].fret);
       }
     }
 
