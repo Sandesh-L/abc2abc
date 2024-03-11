@@ -23,7 +23,7 @@ in from the program-specific file */
 #include "string_utils.h"
 #include "parser_interface.h"
 #include "parser_utils.h"
-#include "./guitar/guitar_model.h"
+#include "../guitar/guitar_model.h"
 
 /* #define SIZE_ABBREVIATIONS ('W' - 'H' + 1) [SS] 2016-09-20 */
 /* must support H-W, h-w and ~ according to 2.2 standard */

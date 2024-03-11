@@ -25,7 +25,7 @@
 #include "parser_interface.h"
 #include "transposer.h"
 #include "parser_utils.h"
-#include "./guitar/guitar_model.c"
+#include "../guitar/guitar_model.c"
 typedef char *char_p;
 
 #define MIDDLE 72
@@ -840,9 +840,14 @@ void conversion_key (void *vstatus, int sharps, const char *s,
   }
   emit_field_key (status, "K:");
   if (conv->transpose == 0 && !conv->nokeysig && !conv->changekeysig) {
-    emit_string (status, s);
+    char modified_key[100];
+    snprintf(modified_key, sizeof(modified_key), "%s guitartab", s);
+    emit_string (status, modified_key);
   } else {
     if (params->gotkey) {
+      char modified_key[100];
+      
+      snprintf(modified_key, sizeof(modified_key), "%s guitartab", new_key);
       emit_string (status, new_key);
       if (params->gotclef) {
         emit_string (status, " ");
@@ -1430,18 +1435,24 @@ void conversion_note (void *vstatus,
   int size;
   NoteLocation* locations = findNote(guitar, standardNotation, &size);
   if (locations != NULL && size > 0){
-    char* chord = convertLocationToChord(&locations[0]);  // Only first location TODO: chage this after optimal path is found
+    char* note = convertLocationToNote(&locations[0]);  // Only first location TODO: chage this after optimal path is found
+    
 
-    status->note_count += 1;
+    char note_count_str[20];
+    snprintf(note_count_str, sizeof(note_count_str), "{%i}", status->note_count);
+    emit_string(status, note_count_str);
+
     if (status->note_locations_file_ptr != NULL){
       fprintf(status->note_locations_file_ptr,"note %d%s ",status->note_count, standardNotation);
       for (int i = 0; i < size; ++i) {
-        fprintf(status->note_locations_file_ptr, "%d,%d \n", locations[i].string, locations[i].fret);
+        if (i > 0) fprintf(status->note_locations_file_ptr, " "); // Separate locations with a space if it's not the first location.
+        fprintf(status->note_locations_file_ptr, "%d_%d", locations[i].string, locations[i].fret);
       }
+      // End the line after all locations for a note have been written.
+      fprintf(status->note_locations_file_ptr, "\n");
     }
-
-    emit_string(status, chord);
-    free(chord);
+    status->note_count++;
+    free(note);
   } else {
     printf("Note note found. \n");
   }

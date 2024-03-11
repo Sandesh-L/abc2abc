@@ -284,7 +284,7 @@ static void prepare_tune (char *filename, abc_text_lines_t * abc_lines)
 }
 
 /* output all the lines in the tune */
-static void output_stored_tune(abc_text_lines_t *abc_output_lines)
+static void output_stored_tune(abc_text_lines_t *abc_output_lines, FILE* output_file)
 {
   string_record_t *current_line;
 
@@ -296,8 +296,10 @@ static void output_stored_tune(abc_text_lines_t *abc_output_lines)
     if ((len > 0) && (current_line->string_data[len - 1] == '\n')) {
       /* if we alreay end with a newline, don't print another one */
       printf ("%s", current_line->string_data);
+      fprintf (output_file,"%s", current_line->string_data);
     } else {
       printf ("%s\n", current_line->string_data);
+      fprintf (output_file, "%s\n", current_line->string_data);
     }
     current_line = current_line->next_string;
   }
@@ -325,6 +327,12 @@ int abc2abc_main (int argc, char *argv[])
   }
 
   status.note_count = 0;
+
+  FILE *output_file = fopen("../abc_output.txt", "w");
+  if (output_file == NULL){
+    perror("Failed to open output file");
+    exit(EXIT_FAILURE);
+  }
 
 
   string_record_t *current_line = NULL;
@@ -361,7 +369,7 @@ int abc2abc_main (int argc, char *argv[])
        ((last_state == INBODY) && (status.state == START_NEW_TUNE)))) {
         /* we have reached the end of a tune inside the file */
       /* print out tune */
-      output_stored_tune(&abc_output_lines);
+      output_stored_tune(&abc_output_lines, output_file);
       free_text_lines (&abc_output_lines);
       init_text_lines (&abc_output_lines);
       /* print out errors and warnings */
@@ -377,10 +385,12 @@ int abc2abc_main (int argc, char *argv[])
     current_line = current_line->next_string;
     fileline = fileline + 1;
   }
+
   /* tidy up after processing file */
   parser_end_abcfile (&status);
 
-  output_stored_tune(&abc_output_lines);
+  output_stored_tune(&abc_output_lines, output_file);
+  fclose(output_file);
 
   /* print out all errors and warnings */
   if (conv->echeck) {

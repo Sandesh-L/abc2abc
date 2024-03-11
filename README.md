@@ -1,0 +1,1 @@
+./fast-downward.py ./generatePddl/a_domain.pddl ./generatePddl/a_problem.pddl --search "astar(lmcut(verbosity=debug), cost_type=normal)"

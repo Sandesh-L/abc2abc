@@ -101,40 +101,38 @@ void freeGuitar(char*** guitar) {
 }
 
 
-char* convertLocationToChord(NoteLocation* location){
+char* convertLocationToNote(NoteLocation* location){
     // TODO: there is a bug in the abctab2ps program. 'l' should represent the 10th fret (as the number 10) but 'x' is written instead
+
+    int commaCount = location->string - 1;
+    char* note = malloc((commaCount + 2) * sizeof(char)); // Allocate memory for commas, fret character, and null terminator
+    if (location == NULL){
+        fprintf(stderr, "Location pointer is NULL\n");
+        return NULL;
+    }
     
-    char* chord = malloc((STRINGS + 2)* sizeof(char)); // 6 strings + 2 for brackets
-    if (chord == NULL){
+    // char* note = malloc((location->string +1)* sizeof(char));
+    if (note == NULL){
         fprintf(stderr, "Memory allocation failed \n");
         exit(EXIT_FAILURE);
     }
 
-    if (location != NULL){
-    //Initialize chord with all strings unplucked
-    strcpy(chord, "[,,,,,,]");
-
-    int stringIndex = location->string;
-    int fret = location->fret;
-
-    // Determine the character for the fret, skipping 'j' (look at Abctab2ps User's Guide for the reason)
-    char fretChar;
-    if (fret == 0){
-        fretChar = 'a';
-    } else {
-        //Determine the character for the fret
-        fretChar = 'b' + fret -1;
-
-        if (fretChar >= 'j'){
-            fretChar++; // Skip 'j'
-        }
-    }
-    // Update the chord string
-    chord[stringIndex + 1] = fretChar; // +1 to account for the opening bracket
+    int noteLength = 0;
+    // Fill with commas up to one less than the string number to simulate string position
+    for (int i=0; i<location->string; i++){
+        note[i] = ',';
+        noteLength++;
     }
 
-    return chord;
+    char fretChar = 'a' + location->fret;
+    if (fretChar >= 'j'){
+        fretChar++; // Skip 'j'
+    }
 
+    note[noteLength]=fretChar;
+    note[noteLength+1] = '\0';
+
+    return note;
 }
 
 
