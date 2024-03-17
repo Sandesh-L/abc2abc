@@ -1,6 +1,7 @@
 
 def parse_cost_file(file_path, note_by_loc):
     actions = ""
+    prev_note = None
     with open(file_path, 'r') as file:
         for line in file:
             locs, cost = line.split(",")
@@ -10,14 +11,25 @@ def parse_cost_file(file_path, note_by_loc):
             # print(loc2)
             # print(note_by_loc)
             if loc2 in note_by_loc:
-                for note in note_by_loc[loc2]:  # Iterate over all notes for loc2
-                    # Generate an action for each note-location pair
-                    actions += f"""
-(:action place_note-{loc1}-{loc2}-{note}
-    :precondition (and (matches {note} {loc2}) (prev-loc {loc1}))
-    :effect (and (note-placed {note}) (prev-loc {loc2}) (increase (total-cost) {c}))
-)
-"""
+                if not prev_note:
+                    for note in note_by_loc[loc2]:  # Iterate over all notes for loc2
+                        # Generate an action for each note-location pair
+                        actions += f"""
+    (:action place_note-{loc1}-{loc2}-{note}
+        :precondition (and (matches {note} {loc2}) (prev-loc {loc1}))
+        :effect (and (note-placed {note}) (prev-loc {loc2}) (prev-note {note})(increase (total-cost) {c}))
+    )
+    """
+                        prev_note = note
+                else:
+                    for note in note_by_loc[loc2]:  # Iterate over all notes for loc2
+                        # Generate an action for each note-location pair
+                        actions += f"""
+    (:action place_note-{loc1}-{loc2}-{note}
+        :precondition (and (matches {note} {loc2}) (prev-loc {loc1}) (prev-note {prev_note}))
+        :effect (and (note-placed {note}) (prev-loc {loc2}) (prev-note {note}) (increase (total-cost) {c}))
+    )
+    """
             else:
                 print(f"No notes for location {loc2}")
             
@@ -27,6 +39,7 @@ def parse_cost_file(file_path, note_by_loc):
 def get_note_by_loc(note_file_path):
     note_by_loc = {}
     with open(note_file_path, 'r') as file:
+        next(file)
         for line in file:
             note_data = line.split()
             for loc in note_data[2:]:
@@ -52,6 +65,7 @@ def generate_domain_file(actions):
         (matches ?n - note ?l - location)
         (note-placed ?n - note)
         (prev-loc ?l - location)
+        (prev-note ?n - note)
     )
 
     (:functions

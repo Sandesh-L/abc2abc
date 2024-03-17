@@ -3,15 +3,17 @@ def convert_location_to_note(string, fret):
     if string is None or fret is None:
         raise ValueError("Invalid input: string and fret cannot be None")
 
-    comma_count = string - 1
+    comma_count = string
     note = [',' for _ in range(comma_count)]
+
+    # print("String and Fret: ",string, fret)
 
     fret_char = chr(ord('a') + fret)
     if fret_char >= 'j':
         fret_char = chr(ord(fret_char) + 1)  # Skip 'j'
 
     note.append(fret_char)
-
+    # print("note: ", note)
     return ''.join(note)
 
 def parse_plan(plan_file_path, note_location_file_path):
@@ -24,7 +26,7 @@ def parse_plan(plan_file_path, note_location_file_path):
         first_location = first_note_location_data[2].split("_")
         string = first_location[0]
         fret = first_location[1]
-        print(string, fret)
+        print(f"converting first note string: {string}, fret: {fret}")
         note = convert_location_to_note(int(string),int(fret))
         notes[0] = (note,note_name)
 
@@ -40,10 +42,12 @@ def parse_plan(plan_file_path, note_location_file_path):
                     fret = int(match.group(2))
                     sequence = int(match.group(3))
                     note_name = match.group(4)
+                    print(f"printing match values: string: {string}, fret: {fret}, sequence: {sequence}, note_name: {note_name}")
                     note = convert_location_to_note(string,fret)
                     notes[sequence] = (note,note_name)
-        print(notes)
+
         sorted_notes = [notes[seq] for seq in sorted(notes.keys())]
+        print(sorted_notes)
         return sorted_notes
 
 def create_abc_tab(parsed_abc_file_path, notes):
@@ -71,13 +75,14 @@ def create_abc_tab(parsed_abc_file_path, notes):
             abc_tab_lines.append(line)
     
     abc_tab = '\n'.join(abc_tab_lines)
+    print(abc_tab)
     with open("../guitar_tab_input.abc", 'w') as file:
         file.write(abc_tab)
-    # return abc_tab
 
-plan_file_path = "../musicPlans/sampleSpeedThePlough.txt"
+
+plan_file_path = "../downward/sas_plan"
 note_location_file_path = "../noteLocations.txt"
 parsed_abc_file_path = "../abc_output.txt"
 notes = parse_plan(plan_file_path, note_location_file_path)
+print(notes)
 create_abc_tab(parsed_abc_file_path, notes)
-# print(abc_tab)

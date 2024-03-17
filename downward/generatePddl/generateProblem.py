@@ -34,7 +34,8 @@ def generate_problem_file(file_path):
         ; first note is set
         (note-placed {first_note})
         (prev-loc {first_note_loc})
-        
+        (prev-note {first_note})
+
         ; define note location pairs
         {matches}
 
