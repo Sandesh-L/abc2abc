@@ -1421,10 +1421,10 @@ void conversion_note (void *vstatus,
   } else if (accidental == '^'){
     accidentalChar = '#';
   }
-  // printf("accidentalChar = %c\n", accidentalChar);
+  printf("accidentalChar = %c\n", accidentalChar);
 
   char standardNotation[6];
-  if (accidentalChar == ' '){  // if there is an accidental
+  if (accidentalChar == ' '){  // if there is no accidental
     snprintf(standardNotation, sizeof(standardNotation), "%c%d", standardNote, octave);
   } else{
     snprintf(standardNotation, sizeof(standardNotation), "%c%c%d", standardNote, accidentalChar, octave);
@@ -1433,11 +1433,10 @@ void conversion_note (void *vstatus,
   // Guitar Model
   char*** guitar = createGuitar();
   int size;
+  printf("\n Standard notation note: %s \n", standardNotation);
+  printf("Standard Notation2: %s\n", standardNotation);
   NoteLocation* locations = findNote(guitar, standardNotation, &size);
   if (locations != NULL && size > 0){
-    char* note = convertLocationToNote(&locations[0]);  // Only first location TODO: chage this after optimal path is found
-    
-
     char note_count_str[20];
     snprintf(note_count_str, sizeof(note_count_str), "{%i}", status->note_count);
     emit_string(status, note_count_str);
@@ -1447,12 +1446,13 @@ void conversion_note (void *vstatus,
       for (int i = 0; i < size; ++i) {
         if (i > 0) fprintf(status->note_locations_file_ptr, " "); // Separate locations with a space if it's not the first location.
         fprintf(status->note_locations_file_ptr, "%d_%d", locations[i].string, locations[i].fret);
+        printf(" Standard Note: %s location:%d_%d", standardNotation, locations[i].string, locations[i].fret);
       }
       // End the line after all locations for a note have been written.
       fprintf(status->note_locations_file_ptr, "\n");
     }
     status->note_count++;
-    free(note);
+    // free(note);
   } else {
     printf("Note note found. \n");
   }

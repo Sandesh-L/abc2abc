@@ -1,8 +1,16 @@
 Tabctoabc.dSYM/
+.DS_Store
 /downward/__pycache__/
+/downward/generatePddl/*
 /downward/output.sas
 /downward/sas_plan
 /downward/sas_plan.*
 /downward/builds/
 /downward/misc/.tox/
 /downward/misc/autodoc/downward-xmlrpc.secret
+testPDFs/.DS_Store
+abc_output.txt
+guitar_tab_input.abc
+movementCosts.txt
+noteLocationas.txt
+out.pdf

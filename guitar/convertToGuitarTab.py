@@ -35,8 +35,10 @@ def parse_plan(plan_file_path, note_location_file_path):
             line = line.strip()
 
             if line.startswith('(place_note-'):
+                print(line)
+                match = re.search(r'\(place\_note-\d+\_\d+-(\d+)\_(\d+)-(\d+)(([a-gA-G]|[a-gA-G][#b])\d+)', line, re.IGNORECASE)
+                print(match)
 
-                match = re.search(r'\(place_note-\d+_\d+-(\d+)_(\d+)-(\d+)([a-z]\d+)', line)
                 if match:
                     string = int(match.group(1))
                     fret = int(match.group(2))
@@ -45,6 +47,9 @@ def parse_plan(plan_file_path, note_location_file_path):
                     print(f"printing match values: string: {string}, fret: {fret}, sequence: {sequence}, note_name: {note_name}")
                     note = convert_location_to_note(string,fret)
                     notes[sequence] = (note,note_name)
+                else:
+                    print("Unable to MATCH")
+
 
         sorted_notes = [notes[seq] for seq in sorted(notes.keys())]
         print(sorted_notes)
@@ -75,7 +80,7 @@ def create_abc_tab(parsed_abc_file_path, notes):
             abc_tab_lines.append(line)
     
     abc_tab = '\n'.join(abc_tab_lines)
-    print(abc_tab)
+    print("abc_tab\n", abc_tab)
     with open("../guitar_tab_input.abc", 'w') as file:
         file.write(abc_tab)
 

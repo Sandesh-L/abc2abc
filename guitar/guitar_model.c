@@ -138,7 +138,7 @@ char* convertLocationToNote(NoteLocation* location){
 
 int calculateDistance(NoteLocation loc1, NoteLocation loc2){
     // weight strings less to minimize excessive movement along the fretboard
-    int stringDistance = abs(loc1.string - loc2.string) * 0;
+    int stringDistance = abs(loc1.string - loc2.string) * 1;
     int fretDistance = abs(loc1.fret - loc2.fret) * 2;
     return stringDistance + fretDistance;
 }

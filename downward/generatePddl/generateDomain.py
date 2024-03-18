@@ -30,8 +30,6 @@ def parse_cost_file(file_path, note_by_loc):
         :effect (and (note-placed {note}) (prev-loc {loc2}) (prev-note {note}) (increase (total-cost) {c}))
     )
     """
-            else:
-                print(f"No notes for location {loc2}")
             
     return actions
 
