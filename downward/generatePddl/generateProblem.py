@@ -4,7 +4,6 @@ def parse_notes_file(file_path):
     matches = ""
     goals = ""
     with open(file_path, 'r') as file:
-        next(file)
         for line_num, line, in enumerate(file):
             note_data = line.split()
             if line_num == 0:
@@ -22,10 +21,7 @@ def parse_notes_file(file_path):
 
 def generate_problem_file(file_path):
 
-    #notes, locations, first_note, first_note_loc, matches, goals
-
     notes, locations, first_note, first_note_loc, matches, goals = parse_notes_file(file_path)
-    # print(notes)
     problem_file_txt = f"""
 (define (problem music_piece)
     (:domain guitar_fretboard)
@@ -38,7 +34,8 @@ def generate_problem_file(file_path):
         ; first note is set
         (note-placed {first_note})
         (prev-loc {first_note_loc})
-        
+        (prev-note {first_note})
+
         ; define note location pairs
         {matches}
 
