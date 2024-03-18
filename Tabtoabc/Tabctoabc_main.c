@@ -307,6 +307,26 @@ int abc2abc_main (int argc, char *argv[])
 {
   char *filename = NULL;
   parser_status_t status;
+
+  status.note_locations_file=".././noteLocations.txt";
+  status.note_locations_file_ptr=fopen(status.note_locations_file, "w");
+  if (status.note_locations_file_ptr == NULL) {
+    perror("Failed to open file for writing");
+    exit(EXIT_FAILURE);
+  }
+  status.prev_note_locations = NULL;
+  status.prev_note_locations_size = 0;
+
+  status.movement_costs_file = ".././movementCosts.txt"; // Adjust path as necessary
+  status.movement_costs_file_ptr = fopen(status.movement_costs_file, "w");
+  if (status.movement_costs_file_ptr == NULL) {
+    perror("Failed to open movement costs file for writing");
+    exit(EXIT_FAILURE); // Consider a more graceful exit strategy in real applications
+  }
+
+  status.note_count = 0;
+
+
   string_record_t *current_line = NULL;
   abc_text_lines_t abc_input_lines;
   int fileline = 1;
@@ -370,6 +390,19 @@ int abc2abc_main (int argc, char *argv[])
   /* free up all our data structures */
   free_text_lines (&abc_input_lines);
   free_text_lines (&abc_output_lines);
+
+  fclose(status.note_locations_file_ptr);
+  status.note_locations_file_ptr = NULL;  // Prevent use-after-free
+  // free(status.note_locations_file);
+  // status.note_locations_file = NULL;  // Prevent use-after-free
+  if (status.movement_costs_file_ptr != NULL) {
+    fclose(status.movement_costs_file_ptr);
+    status.movement_costs_file_ptr = NULL; // Prevent use-after-free
+  }
+
+  free(status.prev_note_locations);
+  status.prev_note_locations_size = 0;
+
   status.tune_data = free_conversion_state (conv);
   free_parser_status (&status);
   return (0);
