@@ -27,7 +27,8 @@ process_downward(){
             python3 generateProblem.py
             cd ..
         echo "Running Fast downward"
-        ./fast-downward.py ./generatePddl/a_domain.pddl ./generatePddl/a_problem.pddl --search "astar(lmcut(), cost_type=normal)"
+        # ./fast-downward.py  --alias seq-sat-lama-2011 ./generatePddl/a_domain.pddl ./generatePddl/a_problem.pddl 
+        ./fast-downward.py ./generatePddl/a_domain.pddl ./generatePddl/a_problem.pddl --search "astar(lmcut(verbosity=debug), cost_type=normal)"
         cd ..
     cd guitar
         ls

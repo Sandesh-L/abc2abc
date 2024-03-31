@@ -111,7 +111,7 @@ def _get_lama(pref):
         "let(hff2, ff(transform=adapt_costs(plusone)),"
         """iterated([
             lazy_greedy([hff1,hlm1],preferred=[hff1,hlm1],
-                 cost_type=one,reopen_closed=false),
+                 cost_type=normal,reopen_closed=false),
             lazy_greedy([hff2,hlm2],preferred=[hff2,hlm2],
                  reopen_closed=false),
             lazy_wastar([hff2,hlm2],preferred=[hff2,hlm2],w=5),
@@ -131,7 +131,7 @@ ALIASES["lama-first"] = [
     "let(hlm, landmark_sum(lm_factory=lm_reasonable_orders_hps(lm_rhw()),transform=adapt_costs(one),pref=false),"
     "let(hff, ff(transform=adapt_costs(one)),"
     """lazy_greedy([hff,hlm],preferred=[hff,hlm],
-                               cost_type=one,reopen_closed=false)))"""]
+                               cost_type=normal,reopen_closed=false)))"""]
 
 ALIASES["seq-opt-bjolp"] = [
     "--search",
