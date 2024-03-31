@@ -1,14 +1,11 @@
 def parse_notes_file(file_path):
-    notes = ""
-    locations = ""
+    notes = "FN"    # preset dummy first note
+    locations = "FL"    # preset dummy location
     matches = ""
     goals = ""
     with open(file_path, 'r') as file:
         for line_num, line, in enumerate(file):
             note_data = line.split()
-            if line_num == 0:
-                first_note = note_data[1]
-                first_note_loc = note_data[2]
 
             notes += f" {note_data[1]}"
             for loc in note_data[2:]:
@@ -17,11 +14,11 @@ def parse_notes_file(file_path):
             matches += " ".join(f"(matches {note_data[1]} {location})" for location in note_data[2:]) + "\n"
             goals += f" (note-placed {note_data[1]})"
 
-    return notes, locations, first_note, first_note_loc, matches, goals
+    return notes, locations, matches, goals
 
 def generate_problem_file(file_path):
 
-    notes, locations, first_note, first_note_loc, matches, goals = parse_notes_file(file_path)
+    notes, locations, matches, goals = parse_notes_file(file_path)
     problem_file_txt = f"""
 (define (problem music_piece)
     (:domain guitar_fretboard)
@@ -32,11 +29,12 @@ def generate_problem_file(file_path):
 
     (:init
         ; first note is set
-        (note-placed {first_note})
-        (prev-loc {first_note_loc})
-        (prev-note {first_note})
+        (note-placed FN)
+        (prev-loc FL)
+        (prev-note FN)
 
         ; define note location pairs
+        (matches FN FL)
         {matches}
 
         ; initialize cost
