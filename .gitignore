@@ -8,6 +8,8 @@ Tabctoabc.dSYM/
 /downward/builds/
 /downward/misc/.tox/
 /downward/misc/autodoc/downward-xmlrpc.secret
+abctab2ps/src/Out.ps
+abctab2ps/src/abctab2ps
 Tabctoabc/Tabctoabc
 Tabctoabc/barlines.o
 Tabctoabc/music_utils.o
